@@ -99,6 +99,8 @@ func Run(ctx context.Context, cfg Config) error {
 
 		ui.PrintLastLines(output, 10)
 
+		reportPRDProgress(cfg.PRDContent)
+
 		if isComplete(output) {
 			now := time.Now()
 			state.Status = "complete"
@@ -123,6 +125,11 @@ func Run(ctx context.Context, cfg Config) error {
 	_ = session.Save(state)
 	ui.MaxIterationsWarning(cfg.MaxIterations)
 	return nil
+}
+
+// BuildPrompt is the exported version of buildPrompt for use in dry-run mode.
+func BuildPrompt(prd, testResults string, iteration int) string {
+	return buildPrompt(prd, testResults, iteration)
 }
 
 func buildPrompt(prd, testResults string, iteration int) string {
@@ -198,6 +205,29 @@ func runTests(ctx context.Context, workDir string, logWriter io.Writer) string {
 		result += fmt.Sprintf("\n(tests exited with error: %v)", err)
 	}
 	return result
+}
+
+// reportPRDProgress scans the PRD for markdown checkboxes and prints progress.
+func reportPRDProgress(prd string) {
+	complete := 0
+	incomplete := 0
+	for _, line := range strings.Split(prd, "\n") {
+		trimmed := strings.TrimSpace(line)
+		if strings.HasPrefix(trimmed, "- [x]") || strings.HasPrefix(trimmed, "- [X]") {
+			complete++
+		} else if strings.HasPrefix(trimmed, "- [ ]") {
+			incomplete++
+		}
+	}
+	total := complete + incomplete
+	if total == 0 {
+		return
+	}
+	pct := 0
+	if total > 0 {
+		pct = complete * 100 / total
+	}
+	ui.Dim(fmt.Sprintf("Progress: %d/%d items complete (%d%%)", complete, total, pct))
 }
 
 func isComplete(output string) bool {

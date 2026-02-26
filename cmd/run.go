@@ -27,6 +27,7 @@ func init() {
 	runCmd.Flags().StringP("dir", "d", "", "Working directory (default: current dir)")
 	runCmd.Flags().Bool("notify", false, "Send macOS notification on completion")
 	runCmd.Flags().Bool("dangerously-skip-permissions", false, "Pass --dangerously-skip-permissions to claude")
+	runCmd.Flags().Bool("dry-run", false, "Print resolved config and prompt without running Claude")
 	rootCmd.AddCommand(runCmd)
 }
 
@@ -83,6 +84,33 @@ func runRun(cmd *cobra.Command, args []string) error {
 	}
 
 	quiet, _ := cmd.Flags().GetBool("quiet")
+
+	dryRun, _ := cmd.Flags().GetBool("dry-run")
+	if dryRun {
+		fmt.Println("--- DRY RUN MODE ---")
+		fmt.Println()
+		fmt.Println("Resolved config:")
+		ui.StatusLine("PRD", prdFile)
+		ui.StatusLine("Model", model)
+		ui.StatusLine("Max iterations", fmt.Sprintf("%d", maxIter))
+		ui.StatusLine("Work dir", workDir)
+		ui.StatusLine("Session", sessionName)
+		testCmd := ""
+		if !skipTests {
+			testCmd = "(auto-detect)"
+		} else {
+			testCmd = "(skipped)"
+		}
+		ui.StatusLine("Test command", testCmd)
+		fmt.Println()
+		fmt.Println("Prompt that would be sent to Claude (iteration 1):")
+		fmt.Println("---")
+		fmt.Println(loop.BuildPrompt(string(data), "", 1))
+		fmt.Println("---")
+		fmt.Println()
+		fmt.Println("(dry-run complete — no Claude invocation performed)")
+		return nil
+	}
 
 	ui.Header("Ralph Loop")
 	ui.StatusLine("PRD", prdFile)
