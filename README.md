@@ -1,3 +1,7 @@
+[![Go](https://img.shields.io/github/go-mod/go-version/kfroemming/ralphkit)](https://go.dev)
+[![Release](https://img.shields.io/github/v/release/kfroemming/ralphkit)](https://github.com/kfroemming/ralphkit/releases/latest)
+[![License](https://img.shields.io/github/license/kfroemming/ralphkit)](LICENSE)
+
 # ralphkit
 
 Orchestrate Ralph-style autonomous AI coding loops with Claude Code.
@@ -8,17 +12,31 @@ A Ralph loop runs Claude Code in an autonomous loop until a PRD/spec is fully co
 
 ## Installation
 
+### Homebrew (macOS/Linux — recommended)
+```bash
+brew tap kfroemming/tap
+brew install ralphkit
+```
+
+### Quick Install (macOS/Linux)
+```bash
+curl -fsSL https://raw.githubusercontent.com/kfroemming/ralphkit/main/install.sh | bash
+```
+
+### Go Install
 ```bash
 go install github.com/kfroemming/ralphkit@latest
 ```
 
-Then verify dependencies:
-
+### From Source
 ```bash
-ralphkit install
+git clone https://github.com/kfroemming/ralphkit.git && cd ralphkit && go build -o ralphkit . && sudo mv ralphkit /usr/local/bin/
 ```
 
-This checks for Node.js, npm, the Claude CLI (`npm install -g @anthropic-ai/claude-code`), and git. It also creates the `~/.ralphkit/` config directory.
+### Post-Install
+Run `ralphkit install` to bootstrap Node.js and the Claude CLI.
+
+> **Note:** Set `ANTHROPIC_API_KEY` in your environment. Get a key at https://console.anthropic.com
 
 ## Quick Start
 
